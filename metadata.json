@@ -1,0 +1,6 @@
+{
+  "name": "MindSchool – Tâm Lý Học Đường",
+  "description": "MindSchool là website giáo dục giúp học sinh hiểu cảm xúc, quản lý áp lực học tập, phát triển kỹ năng và tìm kiếm sự hỗ trợ phù hợp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
