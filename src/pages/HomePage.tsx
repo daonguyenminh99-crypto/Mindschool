@@ -16,6 +16,8 @@ import {
   Wind
 } from 'lucide-react';
 
+import { BRAND } from '../constants/branding';
+
 interface HomePageProps {
   onNavigate: (page: PageId) => void;
   onOpenArticle: (article: Article) => void;
@@ -53,7 +55,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     if (article) {
       onOpenArticle(article);
     } else {
-      onNavigate('explore');
+      onNavigate('corner');
     }
   };
 
@@ -68,7 +70,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
                 <span>🌱</span>
-                <span>Không gian dành cho học sinh</span>
+                <span>{BRAND.name} · {BRAND.tagline}</span>
               </div>
 
               {/* Heading */}
@@ -79,23 +81,23 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </h1>
 
-              {/* Highlight line */}
+              {/* Slogan */}
               <p className="text-lg sm:text-xl font-semibold text-[#5B7CFA] dark:text-[#7C6FF2] leading-relaxed">
-                Hiểu cảm xúc của mình là bước đầu tiên để chăm sóc bản thân.
+                {BRAND.slogan}
               </p>
 
               {/* Body paragraph */}
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
-                MindSchool cung cấp kiến thức, kỹ năng và công cụ tương tác giúp học sinh hiểu bản thân, quản lý áp lực học tập và biết cách tìm kiếm sự hỗ trợ phù hợp trong một không gian an toàn, không phán xét.
+                {BRAND.description}
               </p>
 
               {/* CTA Buttons */}
               <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
                 <button
-                  onClick={() => onNavigate('explore')}
+                  onClick={() => onNavigate('corner')}
                   className="px-6 py-3 rounded-2xl font-semibold text-sm text-white bg-[#5B7CFA] hover:bg-[#486be8] shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2"
                 >
-                  <span>Khám phá ngay</span>
+                  <span>Lắng nghe & Khám phá</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
@@ -375,10 +377,10 @@ export const HomePage: React.FC<HomePageProps> = ({
               </h2>
             </div>
             <button
-              onClick={() => onNavigate('explore')}
+              onClick={() => onNavigate('corner')}
               className="text-xs sm:text-sm font-semibold text-[#5B7CFA] hover:text-[#4465e8] flex items-center gap-1.5 group self-start sm:self-auto"
             >
-              <span>Xem tất cả bài viết</span>
+              <span>Xem tất cả bài viết trong Lắng nghe</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
@@ -418,7 +420,46 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* 4. SECTION: QUIZ TEASER & INTERACTIVE SKILLS PREVIEW */}
+      {/* 4. SECTION: GÓC TÂM LÝ HỌC ĐƯỜNG – LẮNG NGHE BẠN SPOTLIGHT */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl bg-gradient-to-br from-blue-50/90 via-indigo-50/60 to-purple-50/70 dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-blue-200/80 dark:border-slate-800 p-8 sm:p-10 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+          <div className="space-y-3 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-slate-800 text-[#5B7CFA] dark:text-[#7C6FF2] border border-blue-200/80 dark:border-slate-700 shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+              <span>Chuyên mục mới: Lắng nghe bạn</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+              Góc tâm lý học đường – Lắng nghe bạn
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Giải đáp chân thành cho học sinh THPT & THCS về 3 chủ đề quan trọng: <strong>Tình bạn & sự hòa nhập</strong>, <strong>Gia đình & kỳ vọng điểm số</strong>, cùng <strong>Chăm sóc khi cảm xúc quá tải</strong>. Đi kèm mẫu câu gợi ý giao tiếp và hướng dẫn an toàn khẩn cấp.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full lg:w-auto shrink-0">
+            <button
+              onClick={() => onNavigate('corner')}
+              className="px-6 py-3 rounded-2xl font-bold text-xs sm:text-sm text-white bg-[#5B7CFA] hover:bg-[#486be8] shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <span>Vào Góc Lắng Nghe Bạn</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <a
+              href="#sos-urgent-section"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('corner');
+              }}
+              className="px-5 py-2.5 rounded-2xl font-semibold text-xs text-rose-600 dark:text-rose-400 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Hướng dẫn an toàn khi quá tải</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. SECTION: QUIZ TEASER & INTERACTIVE SKILLS PREVIEW */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Quiz Teaser Card */}

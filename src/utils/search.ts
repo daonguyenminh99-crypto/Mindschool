@@ -2,19 +2,21 @@ import { SearchItem } from '../types';
 import { ARTICLES_DATA } from '../data/articlesData';
 import { SKILLS_DATA } from '../data/skillsData';
 import { EMOTIONS } from '../data/emotionsData';
+import { LISTENING_QUESTIONS } from '../data/listeningCornerData';
+import { BRAND } from '../constants/branding';
 
 export function getAllSearchItems(): SearchItem[] {
   const items: SearchItem[] = [];
 
-  // Articles
+  // Articles (Merged into Lắng nghe)
   ARTICLES_DATA.forEach(article => {
     items.push({
       id: `article-${article.id}`,
       title: article.title,
-      category: `Bài viết · ${article.category}`,
+      category: `Lắng nghe · Bài viết ${article.category}`,
       type: 'article',
       snippet: article.shortDescription,
-      page: 'explore'
+      page: 'corner'
     });
   });
 
@@ -42,6 +44,18 @@ export function getAllSearchItems(): SearchItem[] {
     });
   });
 
+  // Listening Corner Q&A
+  LISTENING_QUESTIONS.forEach(q => {
+    items.push({
+      id: `corner-${q.id}`,
+      title: q.question,
+      category: `Lắng nghe bạn · ${q.topicTitle}`,
+      type: 'faq',
+      snippet: q.summary,
+      page: 'corner'
+    });
+  });
+
   // Common FAQ items
   items.push(
     {
@@ -57,7 +71,7 @@ export function getAllSearchItems(): SearchItem[] {
       title: 'Dữ liệu nhật ký và cảm xúc của tôi có bị lộ không?',
       category: 'Hỏi đáp · Quyền riêng tư',
       type: 'faq',
-      snippet: 'MindSchool lưu toàn bộ dữ liệu cục bộ trên trình duyệt của bạn (localStorage), không gửi về máy chủ ngoài.',
+      snippet: `${BRAND.name} lưu toàn bộ dữ liệu cục bộ trên trình duyệt của bạn (localStorage), không gửi về máy chủ ngoài.`,
       page: 'dashboard'
     },
     {

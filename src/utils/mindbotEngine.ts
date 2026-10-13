@@ -1,7 +1,9 @@
 import { ChatMessage, PageId } from '../types';
+import { BRAND } from '../constants/branding';
 
 export interface BotResponse {
   text: string;
+  isCrisis?: boolean;
   suggestions?: string[];
   actionLink?: {
     label: string;
@@ -9,156 +11,235 @@ export interface BotResponse {
   };
 }
 
-export function generateBotReply(userMessage: string): BotResponse {
-  const lower = userMessage.toLowerCase().trim();
+// Crisis Keywords for instant client-side priority detection
+const CRISIS_KEYWORDS = [
+  'tự tử', 'chết', 'kết thúc cuộc sống', 'làm hại bản thân', 'tổn thương bản thân',
+  'không muốn sống', 'rạch tay', 'tự hại', 'muốn biến mất', 'uống thuốc tự tử',
+  'bị đánh đập', 'bị xâm hại', 'nguy hiểm bản thân', 'không an toàn', 'tự sát'
+];
 
-  // 1. Safety & Crisis Detection (Critical Guardrail)
-  const crisisKeywords = [
-    'tự tử', 'chết', 'kết thúc cuộc sống', 'làm hại bản thân', 
-    'không muốn sống', 'rạch tay', 'tự hại', 'muốn biến mất',
-    'bị đánh đập', 'bị xâm hại'
-  ];
+export function isCrisisMessage(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  return CRISIS_KEYWORDS.some(kw => lower.includes(kw));
+}
 
-  if (crisisKeywords.some(kw => lower.includes(kw))) {
+export const CRISIS_FALLBACK_RESPONSE: BotResponse = {
+  text: `Mình hiểu rằng bạn đang phải trải qua những cảm xúc vô cùng khó khăn, đau đớn và mệt mỏi. Bạn không hề đơn độc và bạn không cần phải cố gắng chịu đựng điều này một mình. Tính mạng và sự an toàn của bạn là điều quan trọng nhất lúc này.
+
+Xin bạn hãy thực hiện các bước an toàn sau:
+1. **Tìm người ở bên:** Hãy nói ngay với một người lớn đáng tin cậy (cha mẹ, thầy cô, người thân) hoặc bạn thân và nhờ họ ở cạnh bạn ngay bây giờ.
+2. **Rời khỏi nơi nguy hiểm:** Di chuyển đến nơi có người xung quanh, tránh xa các vật dụng có thể gây hại.
+3. **Liên hệ khẩn cấp:** 
+   - **Tổng đài Quốc gia Bảo vệ Trẻ em 111** (hoạt động 24/7, miễn phí).
+   - **Cấp cứu y tế 115** nếu có thương tổn hoặc nguy cơ cấp bách.
+   - **Đường dây nóng Ngày Mai / Hỗ trợ tâm lý:** 096 306 1414.
+
+Nếu chưa biết mở lời thế nào, bạn chỉ cần nói một câu đơn giản:
+> *"Dạo này em cảm thấy rất không ổn, em đang có những suy nghĩ khiến em lo sợ và em cần một người ở bên giúp đỡ."*`,
+  isCrisis: true,
+  suggestions: [
+    'Gọi Tổng đài 111 ngay',
+    'Tôi cần người ở bên',
+    'Đến Góc Lắng nghe bạn'
+  ],
+  actionLink: {
+    label: 'Đến mục: Hỗ trợ khẩn cấp',
+    page: 'corner'
+  }
+};
+
+/**
+ * Sends conversation to the real Gemini 3.8 Flash backend API
+ * Maintains multi-turn context and handles resilience/fallbacks
+ */
+export async function sendChatMessageToAI(
+  userMessage: string,
+  history: ChatMessage[] = []
+): Promise<BotResponse> {
+  const text = userMessage.trim();
+  if (!text) {
     return {
-      text: 'Mình nghe thấy bạn đang phải trải qua một nỗi đau và khó khăn rất lớn. Bạn không hề đơn độc và luôn có người sẵn sàng ở bên lắng nghe bạn. Xin bạn hãy chia sẻ ngay với một người lớn đáng tin cậy (bố mẹ, thầy cô) hoặc liên hệ ngay với Tổng đài Quốc gia Bảo vệ Trẻ em 111 (miễn phí, bảo mật 24/7). Sự an toàn và tính mạng của bạn là điều quý giá nhất.',
-      suggestions: [
-        'Gọi Tổng đài 111 ngay',
-        'Tôi muốn tìm người hỗ trợ',
-        'Cần không gian yên tĩnh'
-      ],
-      actionLink: {
-        label: 'Xem danh bạ hỗ trợ khẩn cấp',
-        page: 'help'
-      }
+      text: 'Bạn hãy nhập câu hỏi hoặc điều bạn muốn tâm sự nhé.',
     };
   }
 
-  // 2. Stress from studies / Áp lực học tập
-  if (lower.includes('stress') || lower.includes('áp lực') || lower.includes('quá tải') || lower.includes('bài tập')) {
-    return {
-      text: 'Mình rất thấu hiểu cảm giác này. Khi khối lượng bài vở và kỳ vọng dồn dập, cơ thể và não bộ rất dễ bị quá tải. Bạn hãy thử tạm dừng 10 phút, đứng dậy uống một ly nước mát và hít thở sâu. Sau đó, hãy chỉ chọn MỘT việc nhỏ duy nhất để hoàn thành trước nhé.',
-      suggestions: [
-        'Cho tôi một kế hoạch học tập',
-        'Giúp tôi bình tĩnh hơn',
-        'Kỹ thuật Pomodoro là gì?'
-      ],
-      actionLink: {
-        label: 'Xem kỹ năng Quản lý thời gian',
-        page: 'skills'
-      }
-    };
-  }
+  // Instant safety guardrail priority check
+  const crisisDetected = isCrisisMessage(text);
 
-  // 3. Exam Anxiety / Thi cử, kiểm tra
-  if (lower.includes('thi') || lower.includes('kiểm tra') || lower.includes('lo lắng') || lower.includes('sợ rớt')) {
-    return {
-      text: 'Hồi hộp trước kỳ thi là phản xạ tự nhiên của cơ thể để giúp bạn tỉnh táo hơn, không có nghĩa là bạn học kém đâu! Bạn có thể thử bài tập Thở Hộp 4-4-4 ngay lúc này: Hít sâu 4 giây, giữ 4 giây, và thở ra 4 giây. Bạn đã bỏ ra rất nhiều công sức ôn luyện, hãy tập trung làm từng câu một nhé.',
-      suggestions: [
-        'Giúp tôi bình tĩnh hơn',
-        'Chiến lược ôn thi hiệu quả',
-        'Làm gì khi đầu óc trống rỗng?'
-      ],
-      actionLink: {
-        label: 'Đọc bài: Vì sao trước kỳ thi thường lo lắng',
-        page: 'explore'
-      }
-    };
-  }
+  try {
+    // Format conversation history for multi-turn reasoning
+    const conversationPayload = history.map(msg => ({
+      role: msg.sender === 'user' ? 'user' : 'model',
+      content: msg.text,
+    }));
 
-  // 4. Peer conflict / Mâu thuẫn bạn bè
-  if (lower.includes('bạn bè') || lower.includes('mâu thuẫn') || lower.includes('cãi nhau') || lower.includes('tẩy chay') || lower.includes('cô lập')) {
-    return {
-      text: 'Bất đồng với bạn bè thực sự khiến chúng ta rất buồn và nặng lòng. Thay vì nhắn tin vội vã lúc đang giận, bạn hãy để cảm xúc lắng xuống một chút. Bạn có thể thử công thức nói chuyện: "Mình cảm thấy buồn khi sự việc xảy ra vì mình rất quý cậu...". Nếu bạn đang bị cô lập hay bắt nạt, đừng ngần ngại báo cho thầy cô nhé.',
-      suggestions: [
-        'Cách giao tiếp khi có mâu thuẫn',
-        'Làm sao khi bị bắt nạt?',
-        'Nói "không" với áp lực bạn bè'
-      ],
-      actionLink: {
-        label: 'Xem kỹ năng Giao tiếp khi có mâu thuẫn',
-        page: 'skills'
-      }
-    };
-  }
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: text,
+        messages: conversationPayload,
+      }),
+    });
 
-  // 5. Time management / Quản lý thời gian
-  if (lower.includes('thời gian') || lower.includes('trì hoãn') || lower.includes('kế hoạch') || lower.includes('lười')) {
-    return {
-      text: 'Để quản lý thời gian tốt hơn, bí quyết là đừng cố làm tất cả cùng lúc! Hãy áp dụng phương pháp Pomodoro: 25 phút chỉ tập trung làm 1 việc (tắt điện thoại), sau đó nghỉ trọn vẹn 5 phút. Bạn sẽ ngạc nhiên vì mình hoàn thành bài tập nhanh hơn rất nhiều đấy.',
-      suggestions: [
-        'Cho tôi một kế hoạch học tập',
-        'Cách học khi mất tập trung',
-        'Checklist quản lý thời gian'
-      ],
-      actionLink: {
-        label: 'Mở checklist Quản lý thời gian',
-        page: 'skills'
-      }
-    };
-  }
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      console.warn('[MindBot] API returned non-200:', response.status, errData);
 
-  // 6. Need someone to talk / Tìm người nói chuyện
-  if (lower.includes('nói chuyện') || lower.includes('chia sẻ') || lower.includes('tâm sự') || lower.includes('cô đơn') || lower.includes('buồn')) {
-    return {
-      text: 'MindSchool luôn ở đây lắng nghe bạn. Khi bạn cảm thấy buồn hoặc cô đơn, viết những dòng suy nghĩ vào Góc Nhật Ký hoặc tâm sự với một người bạn tin cậy (bạn thân, thầy cô, anh chị) sẽ giúp lòng nhẹ đi rất nhiều. Bạn muốn chia sẻ thêm về điều gì đang làm bạn bận tâm không?',
-      suggestions: [
-        'Tôi muốn viết nhật ký cảm xúc',
-        'Tôi muốn làm quiz check-in',
-        'Tìm người hỗ trợ xung quanh'
-      ],
-      actionLink: {
-        label: 'Đến Góc Cảm xúc & Nhật ký',
-        page: 'emotion'
+      if (crisisDetected) {
+        return CRISIS_FALLBACK_RESPONSE;
       }
-    };
-  }
 
-  // 7. Calming down / Giúp tôi bình tĩnh
-  if (lower.includes('bình tĩnh') || lower.includes('thở') || lower.includes('tim đập nhanh')) {
-    return {
-      text: 'Hãy cùng mình thực hiện một bài tập thở nhé! 1. Ngồi thẳng lưng, thả lỏng vai. 2. Hít vào thật sâu bằng mũi trong 4 giây. 3. Giữ hơi thở lại trong 4 giây. 4. Thở ra thật chậm bằng miệng trong 4 giây. Cứ lặp lại như vậy 4 lần, nhịp tim của bạn sẽ dịu xuống ngay.',
-      suggestions: [
-        'Mở bài tập thở tương tác',
-        'Check-in cảm xúc hiện tại',
-        'Kỹ năng phục hồi tinh thần'
-      ],
-      actionLink: {
-        label: 'Đến trang Bài tập thở & Cảm xúc',
-        page: 'emotion'
-      }
-    };
-  }
-
-  // Default friendly response
-  return {
-    text: 'Cảm ơn bạn đã chia sẻ với MindBot. Mỗi ngày ở trường đều có những trải nghiệm và cảm xúc khác nhau. Bạn có thể chọn các câu hỏi gợi ý bên dưới hoặc chia sẻ thêm điều bạn đang suy nghĩ nhé. Mình luôn sẵn sàng đồng hành cùng bạn!',
-    suggestions: [
-      'Tôi đang stress vì học tập.',
-      'Tôi đang lo trước kỳ thi.',
-      'Tôi có mâu thuẫn với bạn.',
-      'Tôi muốn quản lý thời gian tốt hơn.',
-      'Tôi muốn tìm người để nói chuyện.'
-    ],
-    actionLink: {
-      label: 'Làm bài check-in tâm trạng',
-      page: 'quiz'
+      return {
+        text: errData.fallbackText || 'MindBot đang xử lý nhiều lượt trao đổi từ các bạn học sinh. Bạn vui lòng thử gửi lại câu hỏi sau giây lát nhé!',
+        suggestions: [
+          'Giải thích lại ngắn hơn',
+          'Gợi ý cách giải bài tập',
+          'Lắng nghe tâm sự'
+        ]
+      };
     }
-  };
+
+    const data = await response.json();
+    const botText = data.text || '';
+    const isCrisis = data.isCrisis || crisisDetected;
+
+    // Generate contextual action link or suggestions if applicable
+    let actionLink: BotResponse['actionLink'];
+    const lowerBotText = botText.toLowerCase();
+
+    if (isCrisis) {
+      actionLink = {
+        label: 'Xem đường dây nóng & người hỗ trợ',
+        page: 'corner',
+      };
+    } else if (lowerBotText.includes('thở hộp') || lowerBotText.includes('hít thở') || lowerBotText.includes('thư giãn')) {
+      actionLink = {
+        label: 'Mở bài tập Thở Hộp 4-4-4',
+        page: 'home',
+      };
+    } else if (lowerBotText.includes('quản lý thời gian') || lowerBotText.includes('pomodoro') || lowerBotText.includes('kỹ năng')) {
+      actionLink = {
+        label: 'Khám phá Kỹ năng học đường',
+        page: 'skills',
+      };
+    } else if (lowerBotText.includes('nhật ký cảm xúc') || lowerBotText.includes('vòng quay cảm xúc')) {
+      actionLink = {
+        label: 'Viết Nhật ký cảm xúc',
+        page: 'emotion',
+      };
+    }
+
+    // Dynamic suggested follow-ups
+    const suggestions = generateDynamicSuggestions(text, botText, isCrisis);
+
+    return {
+      text: botText,
+      isCrisis,
+      suggestions,
+      actionLink,
+    };
+  } catch (error) {
+    console.error('[MindBot] Network or server error:', error);
+
+    if (crisisDetected) {
+      return CRISIS_FALLBACK_RESPONSE;
+    }
+
+    return {
+      text: 'Rất tiếc, đường truyền mạng vừa bị gián đoạn tạm thời. Bạn hãy kiểm tra lại kết nối và gửi lại tin nhắn nhé. Mình luôn sẵn sàng đồng hành cùng bạn!',
+      suggestions: [
+        'Gửi lại câu hỏi',
+        'Cách giảm stress khi học',
+        'Kỹ năng quản lý thời gian'
+      ]
+    };
+  }
+}
+
+/**
+ * Generate smart contextual follow-up questions
+ */
+function generateDynamicSuggestions(userPrompt: string, botResponse: string, isCrisis: boolean): string[] {
+  if (isCrisis) {
+    return [
+      'Tôi cần một người lớn ở bên',
+      'Tổng đài 111 có miễn phí không?',
+      'Cách mở lời với cha mẹ'
+    ];
+  }
+
+  const promptLower = userPrompt.toLowerCase();
+  const respLower = botResponse.toLowerCase();
+
+  if (promptLower.includes('code') || promptLower.includes('lập trình') || promptLower.includes('python') || promptLower.includes('javascript')) {
+    return [
+      'Cho mình xem ví dụ code cụ thể',
+      'Giải thích từng dòng code trên',
+      'Làm thế nào để tránh lỗi này?'
+    ];
+  }
+
+  if (promptLower.includes('toán') || promptLower.includes('lý') || promptLower.includes('hóa') || promptLower.includes('bài tập')) {
+    return [
+      'Giải thích từng bước chi tiết hơn',
+      'Có cách giải nào nhanh hơn không?',
+      'Cho mình một bài tập tương tự để tự luyện'
+    ];
+  }
+
+  if (promptLower.includes('bạn bè') || promptLower.includes('lạc lõng') || promptLower.includes('bắt nạt') || promptLower.includes('tẩy chay')) {
+    return [
+      'Mẫu câu bắt chuyện tự nhiên',
+      'Làm sao khi bị hiểu lầm?',
+      'Kỹ năng nói không khéo léo'
+    ];
+  }
+
+  if (promptLower.includes('bố mẹ') || promptLower.includes('điểm số') || promptLower.includes('kỳ vọng')) {
+    return [
+      'Mẫu câu tâm sự chân thành với bố mẹ',
+      'Làm sao khi bị so sánh với người khác?',
+      'Cách giữ bình tĩnh khi tranh luận'
+    ];
+  }
+
+  if (respLower.includes('1.') && respLower.includes('2.')) {
+    return [
+      'Tóm tắt lại thành 3 ý chính',
+      'Cho ví dụ thực tế trong trường học',
+      'Bước nào là quan trọng nhất?'
+    ];
+  }
+
+  return [
+    'Giải thích cụ thể hơn',
+    'Cho một ví dụ thực tế',
+    'Mình nên bắt đầu từ bước nào trước?'
+  ];
 }
 
 export const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'welcome-1',
     sender: 'mindbot',
-    text: 'Chào bạn! Mình là MindBot 🧠 – trợ lý tâm lý học đường tại MindSchool. Mình ở đây để lắng nghe, chia sẻ kiến thức và cùng bạn tìm ra các cách cân bằng cảm xúc. Hôm nay bạn đang cảm thấy thế nào?',
+    text: `Chào bạn! Mình là **MindBot 🧠** – Trợ lý AI học đường thông minh tại ${BRAND.name}.
+
+Mình được tích hợp mô hình AI hiện đại với khả năng:
+- 📚 **Hỗ trợ học tập & STEM:** Phân tích bài tập Toán, Lý, Hóa, Văn, Anh,... giải thích từng bước rõ ràng.
+- 💻 **Công nghệ & Lập trình:** Viết và giải thích code Python, JS/TS, C++, sửa lỗi thuật toán.
+- ⏳ **Kỹ năng & Kế hoạch:** Quản lý thời gian Pomodoro, lập kế hoạch ôn thi, phương pháp ghi nhớ.
+- 🌱 **Tâm lý & Cuộc sống:** Lắng nghe áp lực thi cử, kỳ vọng gia đình, kỹ năng kết bạn và hòa nhập.
+
+Hôm nay bạn muốn cùng mình trao đổi về chủ đề gì?`,
     timestamp: 'Vừa xong',
     suggestions: [
-      'Tôi đang stress vì học tập.',
-      'Tôi đang lo trước kỳ thi.',
-      'Tôi có mâu thuẫn với bạn.',
-      'Tôi muốn quản lý thời gian tốt hơn.',
-      'Tôi muốn tìm người để nói chuyện.'
+      'Giải bài tập & phương pháp học hiệu quả',
+      'Cách vượt qua áp lực thi cử',
+      'Kỹ năng kết bạn khi ở trường mới',
+      'Lập thời gian biểu học tập Pomodoro'
     ]
   }
 ];

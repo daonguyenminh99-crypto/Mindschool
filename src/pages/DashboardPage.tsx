@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Calendar
 } from 'lucide-react';
+import { BRAND } from '../constants/branding';
 
 interface DashboardPageProps {
   onNavigate: (page: PageId) => void;
@@ -148,7 +149,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, onShow
             Lưu ý về nguồn dữ liệu & tính bảo mật:
           </p>
           <p className="leading-relaxed text-xs">
-            Đây chỉ là dữ liệu do bạn tự nhập/check-in trên website và được lưu cục bộ trên thiết bị của bạn. MindSchool không sử dụng dữ liệu này như khảo sát chung hay đánh giá bệnh lý tâm thần.
+            Đây chỉ là dữ liệu do bạn tự nhập/check-in trên website và được lưu cục bộ trên thiết bị của bạn. {BRAND.name} không sử dụng dữ liệu này như khảo sát chung hay đánh giá bệnh lý tâm thần.
           </p>
         </div>
       </div>

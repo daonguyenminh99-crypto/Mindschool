@@ -1,4 +1,28 @@
-export type PageId = 'home' | 'explore' | 'emotion' | 'quiz' | 'skills' | 'dashboard' | 'help';
+export type PageId = 'home' | 'corner' | 'explore' | 'emotion' | 'quiz' | 'skills' | 'dashboard' | 'help';
+
+export interface ListeningQuestion {
+  id: string;
+  topicId: 'friendship' | 'family' | 'mental-health';
+  topicTitle: string;
+  question: string;
+  summary: string;
+  fullAnswer: {
+    lead: string;
+    bulletPoints?: {
+      title: string;
+      desc: string;
+    }[];
+    practicalSteps?: string[];
+    rememberNote?: string;
+    copyableScript?: {
+      label: string;
+      text: string;
+    };
+    relatedSkillId?: string;
+    relatedArticleId?: string;
+    isUrgent?: boolean;
+  };
+}
 
 export type EmotionType = 
   | 'happy'       // Vui
@@ -90,11 +114,13 @@ export interface ChatMessage {
   sender: 'user' | 'mindbot';
   text: string;
   timestamp: string;
+  isCrisis?: boolean;
   suggestions?: string[];
   actionLink?: {
     label: string;
     page: PageId;
   };
+  isError?: boolean;
 }
 
 export interface SearchItem {

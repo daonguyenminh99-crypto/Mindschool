@@ -14,7 +14,7 @@ import { ArticleModal } from './components/ArticleModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
 import { HomePage } from './pages/HomePage';
-import { ExplorePage } from './pages/ExplorePage';
+import { ListeningCornerPage } from './pages/ListeningCornerPage';
 import { EmotionPage } from './pages/EmotionPage';
 import { QuizPage } from './pages/QuizPage';
 import { SkillsPage } from './pages/SkillsPage';
@@ -24,6 +24,7 @@ import { HelpPage } from './pages/HelpPage';
 import { getStoredTheme, setStoredTheme } from './utils/storage';
 import { ARTICLES_DATA } from './data/articlesData';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { BRAND } from './constants/branding';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>('home');
@@ -34,6 +35,21 @@ export default function App() {
   const [activeArticle, setActiveArticle] = useState<Article | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [hasError, setHasError] = useState(false);
+
+  // Synchronize document.title for all pages with Trạm Cảm Xúc
+  useEffect(() => {
+    const pageTitles: Record<PageId, string> = {
+      home: `${BRAND.name} – ${BRAND.tagline} | ${BRAND.slogan}`,
+      corner: `Lắng nghe & Khám phá – ${BRAND.name}`,
+      explore: `Lắng nghe & Khám phá – ${BRAND.name}`,
+      emotion: `Góc Cảm xúc & Nhật ký – ${BRAND.name}`,
+      quiz: `Check-in Tâm trạng – ${BRAND.name}`,
+      skills: `Kỹ năng Cân bằng – ${BRAND.name}`,
+      dashboard: `Biểu đồ Cảm xúc – ${BRAND.name}`,
+      help: `Mạng lưới Trợ giúp – ${BRAND.name}`,
+    };
+    document.title = pageTitles[currentPage] || `${BRAND.name} – ${BRAND.tagline}`;
+  }, [currentPage]);
 
   // Initialize theme from storage
   useEffect(() => {
@@ -49,8 +65,12 @@ export default function App() {
   // Listen for hash-based navigation if user bookmarks or presses back
   useEffect(() => {
     const handleHash = () => {
-      const hash = window.location.hash.replace('#', '') as PageId;
-      const validPages: PageId[] = ['home', 'explore', 'emotion', 'quiz', 'skills', 'dashboard', 'help'];
+      let hash = window.location.hash.replace('#', '') as PageId;
+      if (hash === 'explore') {
+        hash = 'corner';
+        window.location.hash = 'corner';
+      }
+      const validPages: PageId[] = ['home', 'corner', 'emotion', 'quiz', 'skills', 'dashboard', 'help'];
       if (validPages.includes(hash)) {
         setCurrentPage(hash);
       }
@@ -80,8 +100,9 @@ export default function App() {
   }, []);
 
   const handleNavigate = (page: PageId, targetId?: string) => {
-    setCurrentPage(page);
-    window.location.hash = page;
+    const targetPage = page === 'explore' ? 'corner' : page;
+    setCurrentPage(targetPage);
+    window.location.hash = targetPage;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // If targetId is an article, open that article directly
@@ -91,6 +112,12 @@ export default function App() {
       if (art) {
         setActiveArticle(art);
       }
+    } else if (targetId && targetId.startsWith('corner-')) {
+      const qId = targetId.replace('corner-', '');
+      setTimeout(() => {
+        const el = document.getElementById(`question-${qId}`);
+        el?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
   };
 
@@ -162,9 +189,12 @@ export default function App() {
           />
         )}
 
-        {currentPage === 'explore' && (
-          <ExplorePage
+        {(currentPage === 'corner' || (currentPage as string) === 'explore') && (
+          <ListeningCornerPage
+            onNavigate={handleNavigate}
             onOpenArticle={setActiveArticle}
+            onOpenChat={() => setIsChatOpen(true)}
+            onShowToast={showToast}
           />
         )}
 

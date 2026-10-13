@@ -9,14 +9,21 @@ export interface JournalEntry {
   tags?: string[];
 }
 
-const CHECKINS_KEY = 'mindschool_checkins';
-const JOURNAL_KEY = 'mindschool_journal';
-const SKILLS_CHECKLIST_KEY = 'mindschool_skills_checklist';
-const THEME_KEY = 'mindschool_theme';
+const CHECKINS_KEY = 'tramcamxuc_checkins';
+const LEGACY_CHECKINS_KEY = 'mindschool_checkins';
+
+const JOURNAL_KEY = 'tramcamxuc_journal';
+const LEGACY_JOURNAL_KEY = 'mindschool_journal';
+
+const SKILLS_CHECKLIST_KEY = 'tramcamxuc_skills_checklist';
+const LEGACY_SKILLS_CHECKLIST_KEY = 'mindschool_skills_checklist';
+
+const THEME_KEY = 'tramcamxuc_theme';
+const LEGACY_THEME_KEY = 'mindschool_theme';
 
 export function getCheckIns(): EmotionCheckIn[] {
   try {
-    const raw = localStorage.getItem(CHECKINS_KEY);
+    const raw = localStorage.getItem(CHECKINS_KEY) || localStorage.getItem(LEGACY_CHECKINS_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     console.error('Error reading check-ins', e);
@@ -42,7 +49,7 @@ export function saveCheckIn(checkIn: Omit<EmotionCheckIn, 'id' | 'timestamp'>): 
 
 export function getJournalEntries(): JournalEntry[] {
   try {
-    const raw = localStorage.getItem(JOURNAL_KEY);
+    const raw = localStorage.getItem(JOURNAL_KEY) || localStorage.getItem(LEGACY_JOURNAL_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     console.error('Error reading journal', e);
@@ -78,7 +85,7 @@ export function deleteJournalEntry(id: string): void {
 
 export function getSkillChecklist(): Record<string, boolean> {
   try {
-    const raw = localStorage.getItem(SKILLS_CHECKLIST_KEY);
+    const raw = localStorage.getItem(SKILLS_CHECKLIST_KEY) || localStorage.getItem(LEGACY_SKILLS_CHECKLIST_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch (e) {
     console.error('Error reading checklist', e);
@@ -102,7 +109,7 @@ export function toggleSkillChecklistItem(itemId: string): Record<string, boolean
 
 export function getStoredTheme(): 'light' | 'dark' {
   try {
-    const t = localStorage.getItem(THEME_KEY);
+    const t = localStorage.getItem(THEME_KEY) || localStorage.getItem(LEGACY_THEME_KEY);
     if (t === 'dark' || t === 'light') return t;
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
@@ -129,8 +136,11 @@ export function setStoredTheme(theme: 'light' | 'dark'): void {
 export function clearAllUserData(): void {
   try {
     localStorage.removeItem(CHECKINS_KEY);
+    localStorage.removeItem(LEGACY_CHECKINS_KEY);
     localStorage.removeItem(JOURNAL_KEY);
+    localStorage.removeItem(LEGACY_JOURNAL_KEY);
     localStorage.removeItem(SKILLS_CHECKLIST_KEY);
+    localStorage.removeItem(LEGACY_SKILLS_CHECKLIST_KEY);
   } catch (e) {
     console.error('Error clearing data', e);
   }

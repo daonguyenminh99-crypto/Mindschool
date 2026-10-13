@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, BookOpen, Wrench, Heart, HelpCircle, ArrowRight } from 'lucide-react';
 import { PageId, SearchItem } from '../types';
 import { searchContent, getAllSearchItems } from '../utils/search';
+import { BRAND } from '../constants/branding';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -57,7 +58,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
         className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col"
         role="dialog"
         aria-modal="true"
-        aria-label="Tìm kiếm nội dung MindSchool"
+        aria-label={`Tìm kiếm nội dung ${BRAND.name}`}
       >
         {/* Search Input Bar */}
         <div className="flex items-center px-4 py-3.5 border-b border-slate-200 dark:border-slate-800">

@@ -2,6 +2,8 @@ import React from 'react';
 import { PageId } from '../types';
 import { Heart, Shield, PhoneCall } from 'lucide-react';
 
+import { BRAND } from '../constants/branding';
+
 interface FooterProps {
   onNavigate: (page: PageId) => void;
 }
@@ -9,7 +11,7 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const links: { id: PageId; label: string }[] = [
     { id: 'home', label: 'Trang chủ' },
-    { id: 'explore', label: 'Khám phá' },
+    { id: 'corner', label: 'Lắng nghe' },
     { id: 'emotion', label: 'Cảm xúc' },
     { id: 'quiz', label: 'Quiz' },
     { id: 'skills', label: 'Kỹ năng' },
@@ -26,19 +28,19 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div className="flex items-center gap-2">
               <span className="text-2xl">🧠</span>
               <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Mind<span className="text-[#5B7CFA]">School</span>
+                Trạm <span className="text-[#5B7CFA] bg-gradient-to-r from-[#5B7CFA] to-[#7C6FF2] bg-clip-text text-transparent">Cảm Xúc</span>
               </span>
             </div>
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 italic">
-              &quot;Hiểu mình – Chăm sóc mình – Kết nối với mọi người.&quot;
+            <p className="text-sm font-semibold text-[#5B7CFA] dark:text-[#7C6FF2] italic">
+              &quot;{BRAND.slogan}&quot;
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md leading-relaxed">
-              Dự án website giáo dục tâm lý học đường dành cho học sinh THCS và THPT. Tạo dựng một không gian trực tuyến thân thiện, tích cực, an toàn và không phán xét.
+              Dự án website tâm lý học đường dành cho học sinh THCS và THPT. Tạo dựng một không gian trực tuyến thân thiện, tích cực, an toàn, lắng nghe và đồng hành cùng các bạn trẻ.
             </p>
 
             <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800">
               <PhoneCall className="w-3.5 h-3.5" />
-              <span>Tổng đài Quốc gia Bảo vệ Trẻ em: 111 (Miễn phí 24/7)</span>
+              <span>{BRAND.hotlineName}: {BRAND.hotline}</span>
             </div>
           </div>
 
@@ -75,7 +77,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 Bảo mật cục bộ
               </div>
               <p className="leading-relaxed">
-                MindSchool ưu tiên quyền riêng tư. Dữ liệu check-in trên phiên bản demo được lưu cục bộ trên thiết bị của bạn.
+                {BRAND.name} ưu tiên quyền riêng tư. Dữ liệu check-in trên phiên bản demo được lưu cục bộ trên thiết bị của bạn.
               </p>
             </div>
           </div>

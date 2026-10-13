@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PageId } from '../types';
 import { Search, Sun, Moon, MessageSquare, PhoneCall, Menu, X } from 'lucide-react';
 
+import { BRAND } from '../constants/branding';
+
 interface NavbarProps {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
@@ -32,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems: { id: PageId; label: string }[] = [
     { id: 'home', label: 'Trang chủ' },
-    { id: 'explore', label: 'Khám phá' },
+    { id: 'corner', label: 'Lắng nghe' },
     { id: 'emotion', label: 'Cảm xúc' },
     { id: 'quiz', label: 'Quiz' },
     { id: 'skills', label: 'Kỹ năng' },
@@ -59,13 +61,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Zone 1: Single text element Brand wordmark */}
           <button
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-2 group text-left focus:outline-none"
-            aria-label="MindSchool - Trang chủ"
+            className="flex items-center gap-2.5 group text-left focus:outline-none"
+            aria-label={`${BRAND.name} - Trang chủ`}
           >
             <span className="text-2xl group-hover:scale-110 transition-transform">🧠</span>
-            <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Mind<span className="text-[#5B7CFA]">School</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+                Trạm <span className="text-[#5B7CFA] bg-gradient-to-r from-[#5B7CFA] to-[#7C6FF2] bg-clip-text text-transparent">Cảm Xúc</span>
+              </span>
+              <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 hidden sm:block tracking-tight -mt-0.5">
+                {BRAND.tagline}
+              </span>
+            </div>
           </button>
 
           {/* Zone 2: Navigation Links (Desktop) */}
